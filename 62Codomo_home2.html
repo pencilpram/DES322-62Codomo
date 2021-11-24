@@ -255,6 +255,7 @@
                         <div class="col-md-12 pt-5">
                             <CartItem v-for="item in cart" :item="item" :key="item.id" />
                         </div>
+                        <div class="pt-3">Total Price {{totalprice}} ฿</div>
                     </div>
                 </div>
             </div>
@@ -303,7 +304,7 @@
     </template>
 
     <template id="cartitem-template">
-        <div>{{item.name}} - {{item.count}} - {{item.price}}</div>
+        <div>{{item.name}} - {{item.count}} - {{item.price}} - {{item.subtotal}}<button @click="removeFromCart()" class="btn btn-danger btn-block mr-3">Remove</button></div></div>
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -358,14 +359,16 @@
                     item = this.cart.find(product => product.id == id)
 
                     if (item) { // if this product already in the cart
-                        item.count += 1
+                        item.count += 1,
+                        item.subtotal += item.price
                     } else {
                         item = this.products.find(product => product.id == id)
                         this.cart.push({
                             id: item.id,
+                            price: item.price,
                             name: item.name,
                             count: 1,
-                            price: item.price
+                            subtotal: item.price
                         })
                     }
                     console.log(this.cart)
@@ -389,6 +392,13 @@
                         total += this.cart[i].count
                     }
                     return total
+                },
+                totalprice: function () {
+                    var totalp = 0
+                    for (i in this.cart) {
+                        totalp += this.cart[i].subtotal
+                    }
+                    return totalp
                 }
             }
 
@@ -412,6 +422,23 @@
         app.component('Cartitem', {
             props: ['item'],
             template: '#cartitem-template',
+            methods: {
+                removeFromCart: function () {
+                    if (this.item.count == 0) {
+                        this.item.count = 0,
+                        this.item.subtotal = 0
+                    } else {
+                        this.item.count -= 1,
+                            this.item.subtotal -= this.item.price
+                    }
+
+                },
+                undo: function () {
+                    this.item.count += 1,
+                        this.item.subtotal += this.item.price
+                }
+
+            },
         });
 
         app.mount("#app")
